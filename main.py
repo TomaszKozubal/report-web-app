@@ -35,7 +35,7 @@ def get_active(report: pd.DataFrame, user: str) -> pd.DataFrame:
 
 # ── metric functions ───────────────────────────────────────────────────────────
 
-COL = "Ilość publikacji"   # column name in the Excel file
+COL = "Liczba publikacji"   # column name in the Excel file
 
 def all_pubs(active: pd.DataFrame) -> int:
     return int(active[COL].sum(min_count=0))
