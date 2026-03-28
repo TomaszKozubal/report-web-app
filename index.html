@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Publication Report</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f6f9;
+      color: #1a1a2e;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px;
+    }
+
+    h1 { font-size: 1.6rem; margin-bottom: 6px; }
+    .subtitle { color: #666; font-size: 0.9rem; margin-bottom: 32px; }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      padding: 28px 32px;
+      width: 100%;
+      max-width: 560px;
+      margin-bottom: 20px;
+    }
+
+    .card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 16px; color: #444; }
+
+    /* file upload */
+    .upload-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 2px dashed #c8d0e0;
+      border-radius: 8px;
+      padding: 18px 20px;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .upload-label:hover { border-color: #4f7cff; }
+    .upload-label input { display: none; }
+    .upload-icon { font-size: 1.6rem; }
+    .upload-text { font-size: 0.9rem; color: #555; }
+    .upload-text strong { display: block; color: #1a1a2e; }
+    #file-name { font-size: 0.8rem; color: #4f7cff; margin-top: 8px; min-height: 18px; }
+
+    /* user dropdown */
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #dde2ee;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: #fff;
+      color: #1a1a2e;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+    select:disabled { background-color: #f4f6f9; color: #aaa; }
+
+    /* checkboxes */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .metric-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.9rem;
+      line-height: 1.3;
+    }
+    .metric-item input[type="checkbox"] {
+      margin-top: 2px;
+      accent-color: #4f7cff;
+      width: 16px; height: 16px;
+      flex-shrink: 0;
+    }
+
+    /* button */
+    button#calc-btn {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 8px;
+      background: #4f7cff;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, opacity .2s;
+    }
+    button#calc-btn:hover { background: #3a65e8; }
+    button#calc-btn:disabled { opacity: .5; cursor: default; }
+
+    /* results */
+    #results { width: 100%; max-width: 560px; }
+
+    .result-row {
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .result-label { font-size: 0.85rem; color: #666; flex: 1; }
+    .result-value { font-size: 1.1rem; font-weight: 700; color: #4f7cff; text-align: right; }
+    .result-list { font-size: 0.8rem; color: #444; text-align: right; word-break: break-all; max-width: 280px; }
+
+    #error-box {
+      background: #fff0f0;
+      border: 1px solid #ffb3b3;
+      border-radius: 8px;
+      padding: 14px 18px;
+      color: #c0392b;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
+
+    #loading { text-align: center; color: #888; font-size: 0.9rem; padding: 20px; display: none; }
+  </style>
+</head>
+<body>
+
+<h1>📊 Publication Report</h1>
+<p class="subtitle">Upload your Excel file, pick a user, choose your metrics.</p>
+
+<!-- Step 1: File -->
+<div class="card">
+  <h2>1 — Upload file</h2>
+  <label class="upload-label">
+    <input type="file" id="file-input" accept=".xlsx,.xls" />
+    <span class="upload-icon">📂</span>
+    <span class="upload-text">
+      <strong>Choose Excel file</strong>
+      .xlsx · .xls accepted
+    </span>
+  </label>
+  <div id="file-name"></div>
+</div>
+
+<!-- Step 2: User -->
+<div class="card">
+  <h2>2 — Select user</h2>
+  <select id="user-select" disabled>
+    <option value="">— upload a file first —</option>
+  </select>
+</div>
+
+<!-- Step 3: Metrics -->
+<div class="card">
+  <h2>3 — Choose metrics</h2>
+  <div class="metric-grid">
+    <label class="metric-item">
+      <input type="checkbox" value="all_pubs" checked />
+      Total publications
+    </label>
+    <label class="metric-item">
+      <input type="checkbox" value="avg_pubs" checked />
+      Avg pubs per content
+    </label>
+    <label class="metric-item">
+      <input type="checkbox" value="rate_at_least_1" />
+      % with ≥1 pub
+    </label>
+    <label class="metric-item">
+      <input type="checkbox" value="rate_at_least_3" />
+      % with ≥3 pubs
+    </label>
+    <label class="metric-item">
+      <input type="checkbox" value="rate_zero" />
+      % with 0 pubs
+    </label>
+    <label class="metric-item">
+      <input type="checkbox" value="count_zero" />
+      # pieces with 0 pubs
+    </label>
+    <label class="metric-item">
+      <input type="checkbox" value="ids_zero" />
+      Content IDs with 0 pubs
+    </label>
+    <label class="metric-item">
+      <input type="checkbox" value="top3_reach" />
+      Top 3 by reach
+    </label>
+  </div>
+</div>
+
+<!-- Calculate -->
+<div class="card">
+  <button id="calc-btn" disabled>Calculate</button>
+</div>
+
+<div id="loading">⏳ Calculating…</div>
+<div id="results"></div>
+
+<script>
+  // ── config ────────────────────────────────────────────────────────────────
+  // Empty string means "same origin as wherever this page was loaded from"
+  // Works locally (localhost:8000) and in production (yourapp.onrender.com) without any changes
+  const API_BASE = "";
+
+  // ── state ─────────────────────────────────────────────────────────────────
+  let uploadedFile = null;
+
+  const fileInput   = document.getElementById("file-input");
+  const fileNameEl  = document.getElementById("file-name");
+  const userSelect  = document.getElementById("user-select");
+  const calcBtn     = document.getElementById("calc-btn");
+  const resultsEl   = document.getElementById("results");
+  const loadingEl   = document.getElementById("loading");
+
+  // ── file upload → fetch users ─────────────────────────────────────────────
+  fileInput.addEventListener("change", async () => {
+    uploadedFile = fileInput.files[0];
+    if (!uploadedFile) return;
+
+    fileNameEl.textContent = `✓ ${uploadedFile.name}`;
+    userSelect.innerHTML = "<option>Loading users…</option>";
+    userSelect.disabled = true;
+    calcBtn.disabled = true;
+
+    const form = new FormData();
+    form.append("file", uploadedFile);
+
+    try {
+      const res  = await fetch(`${API_BASE}/users`, { method: "POST", body: form });
+      const data = await res.json();
+
+      if (data.error) throw new Error(data.error);
+
+      userSelect.innerHTML = '<option value="">— select a user —</option>';
+      data.users.forEach(u => {
+        const opt = document.createElement("option");
+        opt.value = opt.textContent = u;
+        userSelect.appendChild(opt);
+      });
+      userSelect.disabled = false;
+    } catch (err) {
+      userSelect.innerHTML = `<option>Error: ${err.message}</option>`;
+    }
+  });
+
+  userSelect.addEventListener("change", () => {
+    calcBtn.disabled = !userSelect.value;
+  });
+
+  // ── calculate ─────────────────────────────────────────────────────────────
+  calcBtn.addEventListener("click", async () => {
+    const user = userSelect.value;
+    const selected = [...document.querySelectorAll(".metric-grid input:checked")]
+      .map(cb => cb.value);
+
+    if (!selected.length) {
+      showError("Please select at least one metric.");
+      return;
+    }
+
+    resultsEl.innerHTML = "";
+    loadingEl.style.display = "block";
+    calcBtn.disabled = true;
+
+    const form = new FormData();
+    form.append("file", uploadedFile);
+    form.append("user", user);
+    form.append("metrics", JSON.stringify(selected));
+
+    try {
+      const res  = await fetch(`${API_BASE}/calculate`, { method: "POST", body: form });
+      const data = await res.json();
+
+      loadingEl.style.display = "none";
+      calcBtn.disabled = false;
+
+      if (data.error) { showError(data.error); return; }
+
+      renderResults(data.user, data.results);
+    } catch (err) {
+      loadingEl.style.display = "none";
+      calcBtn.disabled = false;
+      showError("Could not reach the server. Is the backend running?");
+    }
+  });
+
+  // ── render ─────────────────────────────────────────────────────────────────
+  function renderResults(user, results) {
+    resultsEl.innerHTML = `
+      <div class="card" style="margin-bottom:10px;">
+        <h2>Results for <span style="color:#4f7cff">${user}</span></h2>
+      </div>`;
+
+    for (const [label, value] of Object.entries(results)) {
+      const row = document.createElement("div");
+      row.className = "result-row";
+
+      if (Array.isArray(value)) {
+        // list of IDs or objects
+        const formatted = value.map(v =>
+          typeof v === "object" ? `ID ${v["ID Treści"]} — reach ${v["Zasięg"]}` : v
+        ).join("<br>");
+        row.innerHTML = `
+          <span class="result-label">${label}</span>
+          <span class="result-list">${formatted || "—"}</span>`;
+      } else {
+        row.innerHTML = `
+          <span class="result-label">${label}</span>
+          <span class="result-value">${value}</span>`;
+      }
+      resultsEl.appendChild(row);
+    }
+  }
+
+  function showError(msg) {
+    resultsEl.innerHTML = `<div id="error-box">⚠️ ${msg}</div>`;
+  }
+</script>
+</body>
+</html>
