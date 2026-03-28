@@ -40,26 +40,31 @@ COL = "Liczba publikacji"   # column name in the Excel file
 def all_pubs(active: pd.DataFrame) -> int:
     return int(active[COL].sum(min_count=0))
 
+def total_pieces(active: pd.DataFrame) -> int:
+    return len(active)
+
 def avg_pubs(active: pd.DataFrame) -> float:
-    return round(float(active[COL].mean()), 2)
+    return round(float(active[COL].sum() / len(active)), 2)
 
 def publication_rate_1(active: pd.DataFrame) -> float:
-    pct = (active[COL].sum() / len(active)) * 100
+    # count rows where value is not null AND greater than 0
+    pct = (active[COL].fillna(0).gt(0).sum() / len(active)) * 100
     return round(pct, 2)
 
 def publication_rate_3(active: pd.DataFrame) -> float:
-    pct = (len(active[active[COL] >= 3]) / len(active)) * 100
+    pct = (active[COL].fillna(0).ge(3).sum() / len(active)) * 100
     return round(pct, 2)
 
 def publication_rate_0(active: pd.DataFrame) -> float:
-    pct = (active[COL].isna().sum() / len(active)) * 100
+    # 0 pubs = NaN or explicit 0
+    pct = (active[COL].fillna(0).eq(0).sum() / len(active)) * 100
     return round(pct, 2)
 
 def zeropubs(active: pd.DataFrame) -> int:
-    return int(active[COL].isna().sum())
+    return int(active[COL].fillna(0).eq(0).sum())
 
 def zero_pubs_ids(active: pd.DataFrame) -> list:
-    return active[active[COL].isna()]["ID Treści"].tolist()
+    return active[active[COL].fillna(0).eq(0)]["ID Treści"].tolist()
 
 def zero_summary(active: pd.DataFrame) -> dict:
     ids = active[active[COL].isna()]["ID Treści"].tolist()
@@ -115,7 +120,8 @@ async def calculate(
                 continue
 
             METRIC_MAP = {
-                "all_pubs":        ("Total publications",           lambda a=active: all_pubs(a)),
+                "all_pubs":        ("Sum of all publications",      lambda a=active: all_pubs(a)),
+                "total_pieces":    ("Total content pieces",         lambda a=active: total_pieces(a)),
                 "avg_pubs":        ("Avg publications per content", lambda a=active: avg_pubs(a)),
                 "rate_at_least_1": ("% content with ≥1 pub",        lambda a=active: f"{publication_rate_1(a)}%"),
                 "rate_at_least_3": ("% content with ≥3 pubs",       lambda a=active: f"{publication_rate_3(a)}%"),
