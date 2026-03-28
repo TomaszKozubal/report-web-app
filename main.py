@@ -35,29 +35,31 @@ def get_active(report: pd.DataFrame, user: str) -> pd.DataFrame:
 
 # ── metric functions ───────────────────────────────────────────────────────────
 
+COL = "Ilość publikacji"   # column name in the Excel file
+
 def all_pubs(active: pd.DataFrame) -> int:
-    return int(active["Liczba publikacji"].sum())
+    return int(active[COL].sum(min_count=0))
 
 def avg_pubs(active: pd.DataFrame) -> float:
-    return round(float(active["Liczba publikacji"].mean()), 2)
+    return round(float(active[COL].mean()), 2)
 
 def publication_rate_1(active: pd.DataFrame) -> float:
-    pct = (len(active[active["Liczba publikacji"] > 0]) / len(active)) * 100
+    pct = (active[COL].notna().sum() / len(active)) * 100
     return round(pct, 2)
 
 def publication_rate_3(active: pd.DataFrame) -> float:
-    pct = (len(active[active["Liczba publikacji"] >= 3]) / len(active)) * 100
+    pct = (len(active[active[COL] >= 3]) / len(active)) * 100
     return round(pct, 2)
 
 def publication_rate_0(active: pd.DataFrame) -> float:
-    pct = (len(active[active["Liczba publikacji"] == 0]) / len(active)) * 100
+    pct = (active[COL].isna().sum() / len(active)) * 100
     return round(pct, 2)
 
 def zeropubs(active: pd.DataFrame) -> int:
-    return int(active[active["Liczba publikacji"] == 0].shape[0])
+    return int(active[COL].isna().sum())
 
 def zero_pubs_ids(active: pd.DataFrame) -> list:
-    return active[active["Liczba publikacji"] == 0]["ID Treści"].tolist()
+    return active[active[COL].isna()]["ID Treści"].tolist()
 
 def top3_by_reach(active: pd.DataFrame) -> list:
     top3 = (
