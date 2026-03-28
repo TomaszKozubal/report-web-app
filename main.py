@@ -44,7 +44,7 @@ def avg_pubs(active: pd.DataFrame) -> float:
     return round(float(active[COL].mean()), 2)
 
 def publication_rate_1(active: pd.DataFrame) -> float:
-    pct = (active[COL].notna().sum() / len(active)) * 100
+    pct = (active[COL].sum() / len(active)) * 100
     return round(pct, 2)
 
 def publication_rate_3(active: pd.DataFrame) -> float:
