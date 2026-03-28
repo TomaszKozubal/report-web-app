@@ -30,7 +30,6 @@
       max-width: 560px;
       margin-bottom: 20px;
     }
-
     .card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 16px; color: #444; }
 
     /* file upload */
@@ -51,54 +50,60 @@
     .upload-text strong { display: block; color: #1a1a2e; }
     #file-name { font-size: 0.8rem; color: #4f7cff; margin-top: 8px; min-height: 18px; }
 
-    /* user dropdown */
-    select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1.5px solid #dde2ee;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      background: #fff;
-      color: #1a1a2e;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
+    /* select all / deselect all */
+    .section-controls { display: flex; gap: 12px; margin-bottom: 12px; }
+    .link-btn {
+      background: none; border: none; color: #4f7cff;
+      font-size: 0.82rem; cursor: pointer; padding: 0; text-decoration: underline;
     }
-    select:disabled { background-color: #f4f6f9; color: #aaa; }
+    .link-btn:hover { color: #3a65e8; }
 
-    /* checkboxes */
-    .metric-grid {
+    /* user checkbox grid */
+    .user-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 6px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding-right: 4px;
     }
-    .metric-item {
+    .user-grid::-webkit-scrollbar { width: 4px; }
+    .user-grid::-webkit-scrollbar-thumb { background: #dde2ee; border-radius: 4px; }
+
+    .check-item {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 8px;
-      font-size: 0.9rem;
-      line-height: 1.3;
+      font-size: 0.88rem;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .check-item:hover { background: #f4f6f9; }
+    .check-item input[type="checkbox"] {
+      accent-color: #4f7cff;
+      width: 15px; height: 15px;
+      flex-shrink: 0;
+    }
+
+    /* metric checkboxes */
+    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .metric-item {
+      display: flex; align-items: flex-start;
+      gap: 8px; font-size: 0.9rem; line-height: 1.3;
     }
     .metric-item input[type="checkbox"] {
-      margin-top: 2px;
-      accent-color: #4f7cff;
-      width: 16px; height: 16px;
-      flex-shrink: 0;
+      margin-top: 2px; accent-color: #4f7cff;
+      width: 16px; height: 16px; flex-shrink: 0;
     }
 
     /* button */
     button#calc-btn {
-      width: 100%;
-      padding: 13px;
-      border: none;
-      border-radius: 8px;
-      background: #4f7cff;
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .2s, opacity .2s;
+      width: 100%; padding: 13px; border: none;
+      border-radius: 8px; background: #4f7cff;
+      color: #fff; font-size: 1rem; font-weight: 600;
+      cursor: pointer; transition: background .2s, opacity .2s;
     }
     button#calc-btn:hover { background: #3a65e8; }
     button#calc-btn:disabled { opacity: .5; cursor: default; }
@@ -106,38 +111,45 @@
     /* results */
     #results { width: 100%; max-width: 560px; }
 
-    .result-row {
+    .user-result-block {
       background: #fff;
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin-bottom: 10px;
-      box-shadow: 0 1px 6px rgba(0,0,0,.06);
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .user-result-header {
+      background: #4f7cff;
+      color: #fff;
+      padding: 14px 20px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .result-row {
+      padding: 14px 20px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       gap: 12px;
+      border-bottom: 1px solid #f0f2f7;
     }
+    .result-row:last-child { border-bottom: none; }
     .result-label { font-size: 0.85rem; color: #666; flex: 1; }
-    .result-value { font-size: 1.1rem; font-weight: 700; color: #4f7cff; text-align: right; }
+    .result-value { font-size: 1.05rem; font-weight: 700; color: #4f7cff; text-align: right; }
     .result-list { font-size: 0.8rem; color: #444; text-align: right; word-break: break-all; max-width: 280px; }
 
     #error-box {
-      background: #fff0f0;
-      border: 1px solid #ffb3b3;
-      border-radius: 8px;
-      padding: 14px 18px;
-      color: #c0392b;
-      font-size: 0.9rem;
-      margin-bottom: 12px;
+      background: #fff0f0; border: 1px solid #ffb3b3;
+      border-radius: 8px; padding: 14px 18px;
+      color: #c0392b; font-size: 0.9rem; margin-bottom: 12px;
     }
-
     #loading { text-align: center; color: #888; font-size: 0.9rem; padding: 20px; display: none; }
   </style>
 </head>
 <body>
 
 <h1>📊 Publication Report</h1>
-<p class="subtitle">Upload your Excel file, pick a user, choose your metrics.</p>
+<p class="subtitle">Upload your Excel file, pick users, choose your metrics.</p>
 
 <!-- Step 1: File -->
 <div class="card">
@@ -153,50 +165,30 @@
   <div id="file-name"></div>
 </div>
 
-<!-- Step 2: User -->
+<!-- Step 2: Users -->
 <div class="card">
-  <h2>2 — Select user</h2>
-  <select id="user-select" disabled>
-    <option value="">— upload a file first —</option>
-  </select>
+  <h2>2 — Select users</h2>
+  <div class="section-controls" id="user-controls" style="display:none;">
+    <button class="link-btn" id="select-all-btn">Select all</button>
+    <button class="link-btn" id="deselect-all-btn">Deselect all</button>
+  </div>
+  <div id="user-list-wrapper">
+    <p style="color:#aaa; font-size:0.9rem;">— upload a file first —</p>
+  </div>
 </div>
 
 <!-- Step 3: Metrics -->
 <div class="card">
   <h2>3 — Choose metrics</h2>
   <div class="metric-grid">
-    <label class="metric-item">
-      <input type="checkbox" value="all_pubs" checked />
-      Total publications
-    </label>
-    <label class="metric-item">
-      <input type="checkbox" value="avg_pubs" checked />
-      Avg pubs per content
-    </label>
-    <label class="metric-item">
-      <input type="checkbox" value="rate_at_least_1" />
-      % with ≥1 pub
-    </label>
-    <label class="metric-item">
-      <input type="checkbox" value="rate_at_least_3" />
-      % with ≥3 pubs
-    </label>
-    <label class="metric-item">
-      <input type="checkbox" value="rate_zero" />
-      % with 0 pubs
-    </label>
-    <label class="metric-item">
-      <input type="checkbox" value="count_zero" />
-      # pieces with 0 pubs
-    </label>
-    <label class="metric-item">
-      <input type="checkbox" value="ids_zero" />
-      Content IDs with 0 pubs
-    </label>
-    <label class="metric-item">
-      <input type="checkbox" value="top3_reach" />
-      Top 3 by reach
-    </label>
+    <label class="metric-item"><input type="checkbox" value="all_pubs" checked /> Total publications</label>
+    <label class="metric-item"><input type="checkbox" value="avg_pubs" checked /> Avg pubs per content</label>
+    <label class="metric-item"><input type="checkbox" value="rate_at_least_1" /> % with ≥1 pub</label>
+    <label class="metric-item"><input type="checkbox" value="rate_at_least_3" /> % with ≥3 pubs</label>
+    <label class="metric-item"><input type="checkbox" value="rate_zero" /> % with 0 pubs</label>
+    <label class="metric-item"><input type="checkbox" value="count_zero" /> # pieces with 0 pubs</label>
+    <label class="metric-item"><input type="checkbox" value="ids_zero" /> Content IDs with 0 pubs</label>
+    <label class="metric-item"><input type="checkbox" value="top3_reach" /> Top 3 by reach</label>
   </div>
 </div>
 
@@ -209,29 +201,27 @@
 <div id="results"></div>
 
 <script>
-  // ── config ────────────────────────────────────────────────────────────────
-  // Empty string means "same origin as wherever this page was loaded from"
-  // Works locally (localhost:8000) and in production (yourapp.onrender.com) without any changes
   const API_BASE = "";
-
-  // ── state ─────────────────────────────────────────────────────────────────
   let uploadedFile = null;
 
-  const fileInput   = document.getElementById("file-input");
-  const fileNameEl  = document.getElementById("file-name");
-  const userSelect  = document.getElementById("user-select");
-  const calcBtn     = document.getElementById("calc-btn");
-  const resultsEl   = document.getElementById("results");
-  const loadingEl   = document.getElementById("loading");
+  const fileInput      = document.getElementById("file-input");
+  const fileNameEl     = document.getElementById("file-name");
+  const userWrapper    = document.getElementById("user-list-wrapper");
+  const userControls   = document.getElementById("user-controls");
+  const selectAllBtn   = document.getElementById("select-all-btn");
+  const deselectAllBtn = document.getElementById("deselect-all-btn");
+  const calcBtn        = document.getElementById("calc-btn");
+  const resultsEl      = document.getElementById("results");
+  const loadingEl      = document.getElementById("loading");
 
-  // ── file upload → fetch users ─────────────────────────────────────────────
+  // ── file upload → populate user checkboxes ────────────────────────────────
   fileInput.addEventListener("change", async () => {
     uploadedFile = fileInput.files[0];
     if (!uploadedFile) return;
 
     fileNameEl.textContent = `✓ ${uploadedFile.name}`;
-    userSelect.innerHTML = "<option>Loading users…</option>";
-    userSelect.disabled = true;
+    userWrapper.innerHTML = "<p style='color:#aaa;font-size:0.9rem;'>Loading users…</p>";
+    userControls.style.display = "none";
     calcBtn.disabled = true;
 
     const form = new FormData();
@@ -240,35 +230,50 @@
     try {
       const res  = await fetch(`${API_BASE}/users`, { method: "POST", body: form });
       const data = await res.json();
-
       if (data.error) throw new Error(data.error);
 
-      userSelect.innerHTML = '<option value="">— select a user —</option>';
+      const grid = document.createElement("div");
+      grid.className = "user-grid";
+      grid.id = "user-grid";
+
       data.users.forEach(u => {
-        const opt = document.createElement("option");
-        opt.value = opt.textContent = u;
-        userSelect.appendChild(opt);
+        const label = document.createElement("label");
+        label.className = "check-item";
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.value = u;
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(u));
+        grid.appendChild(label);
       });
-      userSelect.disabled = false;
+
+      userWrapper.innerHTML = "";
+      userWrapper.appendChild(grid);
+      userControls.style.display = "flex";
+      grid.addEventListener("change", updateCalcBtn);
+
     } catch (err) {
-      userSelect.innerHTML = `<option>Error: ${err.message}</option>`;
+      userWrapper.innerHTML = `<p style="color:#c0392b;font-size:0.9rem;">Error: ${err.message}</p>`;
     }
   });
 
-  userSelect.addEventListener("change", () => {
-    calcBtn.disabled = !userSelect.value;
-  });
+  function getUserCheckboxes() {
+    return [...document.querySelectorAll("#user-grid input[type='checkbox']")];
+  }
+
+  function updateCalcBtn() {
+    calcBtn.disabled = !getUserCheckboxes().some(cb => cb.checked);
+  }
+
+  selectAllBtn.addEventListener("click",   () => { getUserCheckboxes().forEach(cb => cb.checked = true);  updateCalcBtn(); });
+  deselectAllBtn.addEventListener("click", () => { getUserCheckboxes().forEach(cb => cb.checked = false); updateCalcBtn(); });
 
   // ── calculate ─────────────────────────────────────────────────────────────
   calcBtn.addEventListener("click", async () => {
-    const user = userSelect.value;
-    const selected = [...document.querySelectorAll(".metric-grid input:checked")]
-      .map(cb => cb.value);
+    const selectedUsers   = getUserCheckboxes().filter(cb => cb.checked).map(cb => cb.value);
+    const selectedMetrics = [...document.querySelectorAll(".metric-grid input:checked")].map(cb => cb.value);
 
-    if (!selected.length) {
-      showError("Please select at least one metric.");
-      return;
-    }
+    if (!selectedMetrics.length) { showError("Please select at least one metric."); return; }
 
     resultsEl.innerHTML = "";
     loadingEl.style.display = "block";
@@ -276,8 +281,8 @@
 
     const form = new FormData();
     form.append("file", uploadedFile);
-    form.append("user", user);
-    form.append("metrics", JSON.stringify(selected));
+    form.append("users",   JSON.stringify(selectedUsers));
+    form.append("metrics", JSON.stringify(selectedMetrics));
 
     try {
       const res  = await fetch(`${API_BASE}/calculate`, { method: "POST", body: form });
@@ -288,7 +293,8 @@
 
       if (data.error) { showError(data.error); return; }
 
-      renderResults(data.user, data.results);
+      data.results.forEach(({ user, results, error }) => renderUserBlock(user, results, error));
+
     } catch (err) {
       loadingEl.style.display = "none";
       calcBtn.disabled = false;
@@ -296,32 +302,37 @@
     }
   });
 
-  // ── render ─────────────────────────────────────────────────────────────────
-  function renderResults(user, results) {
-    resultsEl.innerHTML = `
-      <div class="card" style="margin-bottom:10px;">
-        <h2>Results for <span style="color:#4f7cff">${user}</span></h2>
-      </div>`;
+  // ── render ────────────────────────────────────────────────────────────────
+  function renderUserBlock(user, results, error) {
+    const block = document.createElement("div");
+    block.className = "user-result-block";
 
-    for (const [label, value] of Object.entries(results)) {
+    const header = document.createElement("div");
+    header.className = "user-result-header";
+    header.textContent = user;
+    block.appendChild(header);
+
+    if (error) {
       const row = document.createElement("div");
       row.className = "result-row";
-
-      if (Array.isArray(value)) {
-        // list of IDs or objects
-        const formatted = value.map(v =>
-          typeof v === "object" ? `ID ${v["ID Treści"]} — reach ${v["Zasięg"]}` : v
-        ).join("<br>");
-        row.innerHTML = `
-          <span class="result-label">${label}</span>
-          <span class="result-list">${formatted || "—"}</span>`;
-      } else {
-        row.innerHTML = `
-          <span class="result-label">${label}</span>
-          <span class="result-value">${value}</span>`;
+      row.innerHTML = `<span style="color:#c0392b;font-size:0.85rem;">⚠️ ${error}</span>`;
+      block.appendChild(row);
+    } else {
+      for (const [label, value] of Object.entries(results)) {
+        const row = document.createElement("div");
+        row.className = "result-row";
+        if (Array.isArray(value)) {
+          const formatted = value.map(v =>
+            typeof v === "object" ? `ID ${v["ID Treści"]} — reach ${v["Zasięg"]}` : v
+          ).join("<br>");
+          row.innerHTML = `<span class="result-label">${label}</span><span class="result-list">${formatted || "—"}</span>`;
+        } else {
+          row.innerHTML = `<span class="result-label">${label}</span><span class="result-value">${value}</span>`;
+        }
+        block.appendChild(row);
       }
-      resultsEl.appendChild(row);
     }
+    resultsEl.appendChild(block);
   }
 
   function showError(msg) {
