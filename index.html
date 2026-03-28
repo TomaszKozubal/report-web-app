@@ -186,7 +186,7 @@
     <label class="metric-item"><input type="checkbox" value="rate_at_least_1" /> % with ≥1 pub</label>
     <label class="metric-item"><input type="checkbox" value="rate_at_least_3" /> % with ≥3 pubs</label>
     <label class="metric-item"><input type="checkbox" value="rate_zero" /> % with 0 pubs</label>
-    <label class="metric-item"><input type="checkbox" value="count_zero" /> # pieces with 0 pubs</label>
+    <label class="metric-item"><input type="checkbox" value="count_zero" /> Number of posts with 0 pubs</label>
     <label class="metric-item"><input type="checkbox" value="ids_zero" /> Content IDs with 0 pubs</label>
     <label class="metric-item"><input type="checkbox" value="top3_reach" /> Top 3 by reach</label>
   </div>
@@ -326,6 +326,14 @@
             typeof v === "object" ? `ID ${v["ID Treści"]} — reach ${v["Zasięg"]}` : v
           ).join("<br>");
           row.innerHTML = `<span class="result-label">${label}</span><span class="result-list">${formatted || "—"}</span>`;
+        } else if (typeof value === "object" && value !== null) {
+          const idList = value.ids && value.ids.length ? value.ids.join(", ") : "—";
+          row.innerHTML = `
+            <span class="result-label">${label}</span>
+            <span class="result-list">
+              ${value.count} pieces (${value.pct})<br>
+              <span style="color:#aaa;font-size:0.78rem;">${idList}</span>
+            </span>`;
         } else {
           row.innerHTML = `<span class="result-label">${label}</span><span class="result-value">${value}</span>`;
         }
