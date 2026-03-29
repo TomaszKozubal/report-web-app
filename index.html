@@ -181,7 +181,8 @@
 <div class="card">
   <h2>3 — Choose metrics</h2>
   <div class="metric-grid">
-    <label class="metric-item"><input type="checkbox" value="all_pubs" checked /> Total publications</label>
+    <label class="metric-item"><input type="checkbox" value="all_pubs" checked /> Sum of all publications</label>
+    <label class="metric-item"><input type="checkbox" value="total_pieces" checked /> Total content pieces</label>
     <label class="metric-item"><input type="checkbox" value="avg_pubs" checked /> Avg pubs per content</label>
     <label class="metric-item"><input type="checkbox" value="rate_at_least_1" /> % with ≥1 pub</label>
     <label class="metric-item"><input type="checkbox" value="rate_at_least_3" /> % with ≥3 pubs</label>
@@ -293,7 +294,7 @@
 
       if (data.error) { showError(data.error); return; }
 
-      data.results.forEach(({ user, results, error }) => renderUserBlock(user, results, error));
+      data.results.forEach((entry) => renderUserBlock(entry.user, entry.results, entry.error));
 
     } catch (err) {
       loadingEl.style.display = "none";
