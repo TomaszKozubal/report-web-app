@@ -15,8 +15,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── serve the frontend ─────────────────────────────────────────────────────────
-
 @app.get("/")
 def serve_frontend():
     return FileResponse(os.path.join(os.path.dirname(__file__), "index.html"))
@@ -29,13 +27,14 @@ def load_report(file_bytes: bytes) -> pd.DataFrame:
     report = report.drop(0).reset_index(drop=True)
     return report
 
-def get_active(report: pd.DataFrame, user: str) -> pd.DataFrame:
-    user_df = report[report["Imię i Nazwisko"] == user]
+def get_active(report: pd.DataFrame, users: list) -> pd.DataFrame:
+    """Return all active rows for the given list of users combined."""
+    user_df = report[report["Imię i Nazwisko"].isin(users)]
     return user_df[user_df["Status"] == "ACTIVE"]
 
 # ── metric functions ───────────────────────────────────────────────────────────
 
-COL = "Liczba publikacji"   # column name in the Excel file
+COL = "Liczba publikacji"
 
 def all_pubs(active: pd.DataFrame) -> int:
     return int(active[COL].sum(min_count=0))
@@ -47,7 +46,6 @@ def avg_pubs(active: pd.DataFrame) -> float:
     return round(float(active[COL].sum() / len(active)), 2)
 
 def publication_rate_1(active: pd.DataFrame) -> float:
-    # count rows where value is not null AND greater than 0
     pct = (active[COL].fillna(0).gt(0).sum() / len(active)) * 100
     return round(pct, 2)
 
@@ -56,7 +54,6 @@ def publication_rate_3(active: pd.DataFrame) -> float:
     return round(pct, 2)
 
 def publication_rate_0(active: pd.DataFrame) -> float:
-    # 0 pubs = NaN or explicit 0
     pct = (active[COL].fillna(0).eq(0).sum() / len(active)) * 100
     return round(pct, 2)
 
@@ -65,13 +62,6 @@ def zeropubs(active: pd.DataFrame) -> int:
 
 def zero_pubs_ids(active: pd.DataFrame) -> list:
     return active[active[COL].fillna(0).eq(0)]["ID Treści"].tolist()
-
-def zero_summary(active: pd.DataFrame) -> dict:
-    ids = active[active[COL].isna()]["ID Treści"].tolist()
-    total = len(active)
-    count = len(ids)
-    pct = round((count / total) * 100, 2) if total else 0
-    return {"count": count, "pct": f"{pct}%", "ids": ids}
 
 def top3_by_reach(active: pd.DataFrame) -> list:
     top3 = (
@@ -97,8 +87,8 @@ async def get_users(file: UploadFile = File(...)):
 @app.post("/calculate")
 async def calculate(
     file: UploadFile = File(...),
-    users: str = Form(...),     # JSON-encoded list of selected user names
-    metrics: str = Form(...),   # JSON-encoded list of selected metric keys
+    users: str = Form(...),
+    metrics: str = Form(...),
 ):
     contents = await file.read()
     selected_users   = json.loads(users)
@@ -109,37 +99,35 @@ async def calculate(
     except Exception as e:
         return JSONResponse(status_code=400, content={"error": f"Could not read file: {e}"})
 
-    all_results = []
+    # Get all active rows for all selected users combined
+    active = get_active(report, selected_users)
 
-    for user in selected_users:
-        try:
-            active = get_active(report, user)
+    if active.empty:
+        return JSONResponse(status_code=400, content={"error": "No active records found for selected users"})
 
-            if active.empty:
-                all_results.append({"user": user, "error": "No active records found"})
-                continue
+    try:
+        METRIC_MAP = {
+            "all_pubs":        ("Sum of all publications",      lambda: all_pubs(active)),
+            "total_pieces":    ("Total content pieces",         lambda: total_pieces(active)),
+            "avg_pubs":        ("Avg publications per content", lambda: avg_pubs(active)),
+            "rate_at_least_1": ("% content with ≥1 pub",        lambda: f"{publication_rate_1(active)}%"),
+            "rate_at_least_3": ("% content with ≥3 pubs",       lambda: f"{publication_rate_3(active)}%"),
+            "rate_zero":       ("% content with 0 pubs",         lambda: f"{publication_rate_0(active)}%"),
+            "count_zero":      ("Number of posts with 0 pubs",   lambda: zeropubs(active)),
+            "ids_zero":        ("Content IDs with 0 pubs",       lambda: zero_pubs_ids(active)),
+            "top3_reach":      ("Top 3 content by reach",         lambda: top3_by_reach(active)),
+        }
 
-            METRIC_MAP = {
-                "all_pubs":        ("Sum of all publications",      lambda a=active: all_pubs(a)),
-                "total_pieces":    ("Total content pieces",         lambda a=active: total_pieces(a)),
-                "avg_pubs":        ("Avg publications per content", lambda a=active: avg_pubs(a)),
-                "rate_at_least_1": ("% content with ≥1 pub",        lambda a=active: f"{publication_rate_1(a)}%"),
-                "rate_at_least_3": ("% content with ≥3 pubs",       lambda a=active: f"{publication_rate_3(a)}%"),
-                "rate_zero":       ("% content with 0 pubs",         lambda a=active: f"{publication_rate_0(a)}%"),
-                "count_zero":      ("Number of posts with 0 pubs",   lambda a=active: zeropubs(a)),
-                "ids_zero":        ("Content IDs with 0 pubs",       lambda a=active: zero_pubs_ids(a)),
-                "top3_reach":      ("Top 3 content by reach",         lambda a=active: top3_by_reach(a)),
-            }
+        results = {}
+        for key in selected_metrics:
+            if key in METRIC_MAP:
+                label, fn = METRIC_MAP[key]
+                results[label] = fn()
 
-            results = {}
-            for key in selected_metrics:
-                if key in METRIC_MAP:
-                    label, fn = METRIC_MAP[key]
-                    results[label] = fn()
+        return {
+            "users": selected_users,
+            "results": results
+        }
 
-            all_results.append({"user": user, "results": results})
-
-        except Exception as e:
-            all_results.append({"user": user, "error": str(e)})
-
-    return {"results": all_results}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})

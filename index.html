@@ -294,7 +294,7 @@
 
       if (data.error) { showError(data.error); return; }
 
-      data.results.forEach((entry) => renderUserBlock(entry.user, entry.results, entry.error));
+      renderCombinedResults(data.users, data.results);
 
     } catch (err) {
       loadingEl.style.display = "none";
@@ -304,42 +304,27 @@
   });
 
   // ── render ────────────────────────────────────────────────────────────────
-  function renderUserBlock(user, results, error) {
+  function renderCombinedResults(users, results) {
     const block = document.createElement("div");
     block.className = "user-result-block";
 
     const header = document.createElement("div");
     header.className = "user-result-header";
-    header.textContent = user;
+    header.textContent = users.length === 1 ? users[0] : users.join(", ");
     block.appendChild(header);
 
-    if (error) {
+    for (const [label, value] of Object.entries(results)) {
       const row = document.createElement("div");
       row.className = "result-row";
-      row.innerHTML = `<span style="color:#c0392b;font-size:0.85rem;">⚠️ ${error}</span>`;
-      block.appendChild(row);
-    } else {
-      for (const [label, value] of Object.entries(results)) {
-        const row = document.createElement("div");
-        row.className = "result-row";
-        if (Array.isArray(value)) {
-          const formatted = value.map(v =>
-            typeof v === "object" ? `ID ${v["ID Treści"]} — reach ${v["Zasięg"]}` : v
-          ).join("<br>");
-          row.innerHTML = `<span class="result-label">${label}</span><span class="result-list">${formatted || "—"}</span>`;
-        } else if (typeof value === "object" && value !== null) {
-          const idList = value.ids && value.ids.length ? value.ids.join(", ") : "—";
-          row.innerHTML = `
-            <span class="result-label">${label}</span>
-            <span class="result-list">
-              ${value.count} pieces (${value.pct})<br>
-              <span style="color:#aaa;font-size:0.78rem;">${idList}</span>
-            </span>`;
-        } else {
-          row.innerHTML = `<span class="result-label">${label}</span><span class="result-value">${value}</span>`;
-        }
-        block.appendChild(row);
+      if (Array.isArray(value)) {
+        const formatted = value.map(v =>
+          typeof v === "object" ? `ID ${v["ID Treści"]} — reach ${v["Zasięg"]}` : v
+        ).join("<br>");
+        row.innerHTML = `<span class="result-label">${label}</span><span class="result-list">${formatted || "—"}</span>`;
+      } else {
+        row.innerHTML = `<span class="result-label">${label}</span><span class="result-value">${value}</span>`;
       }
+      block.appendChild(row);
     }
     resultsEl.appendChild(block);
   }
